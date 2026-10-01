@@ -1,32 +1,68 @@
-# React + TypeScript + Vite
+# Investudy — корпоративный портал
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+MVP внутреннего портала с тремя дашбордами: продажи, финансы, маркетинг.
+Светлая тема, название и фирменный знак — с [investudy.kz](https://investudy.kz/).
 
-Currently, two official plugins are available:
+## Запуск
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
-
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the Oxlint configuration
-
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
-
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
+```bash
+npm install
+npm run dev      # дев-сервер
+npm run build    # сборка в dist/
+npm run lint     # oxlint
 ```
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+## Страницы
+
+| Маршрут | Раздел | Что показывает |
+|---|---|---|
+| `/` | Главная | Короткий лендинг: hero-баннер, итоги за 12 месяцев, переходы в разделы |
+| `/sales` | Продажи | Выручка, студенты, средний чек, воронка сделок, результаты менеджеров |
+| `/finance` | Финансы | Доходы и расходы, структура расходов, денежный поток, исполнение плана, P&L |
+| `/marketing` | Маркетинг | Лиды по каналам, CAC, ROMI, эффективность каналов |
+
+Логотип в левом верхнем углу ведёт на главную. Разделы доступны из бокового меню
+с любой страницы.
+
+Фильтр периода стоит один на весь портал — в шапке. Он задаёт срез
+всем плиткам, графикам и таблицам ниже, поэтому цифры между блоками всегда
+согласованы. На главной фильтра нет: она не показывает срез за период.
+
+## Структура
+
+```
+src/
+  data/        демо-данные и производные показатели
+    source.ts      24 месяца исходных значений
+    metrics.ts     расчёт выручки, EBITDA, CAC, ROMI; срезы по периоду
+    breakdowns.ts  разрезы: каналы, продукты, воронка, менеджеры
+  lib/
+    colors.ts      палитра графиков
+    format.ts      форматирование тенге, процентов, чисел
+    period.ts      контекст выбранного периода
+  components/
+    HeroArt.tsx    hero-иллюстрация главной (SVG в фирменных цветах)
+    charts/        обёртки над Recharts с общими настройками
+  pages/           Landing, Sales, Finance, Marketing
+```
+
+Данные демонстрационные и считаются из одного набора в `src/data/source.ts`:
+разрезы сходятся с итогами (сумма лидов по каналам равна общему числу лидов,
+доли менеджеров дают 100 %). Чтобы подключить настоящий источник, достаточно
+заменить `source.ts` на загрузку из API — остальной код работает с типом
+`MonthMetrics`.
+
+## Палитра
+
+Цвета рядов не подбирались на глаз: набор прогнан через проверки на полосу
+светлоты, порог цветности, различимость при протанопии и дейтеранопии и
+контраст к белому фону. Худшая соседняя пара — ΔE 15,1 при протанопии и 28,3
+при обычном зрении, все шесть цветов дают не менее 3:1 к фону.
+
+Слот 1 — фирменная бирюза Investudy, сдвинутая на шаг светлее: исходный
+`#05828e` не добирает порог цветности и как цвет ряда читался бы серым.
+Он остался цветом интерфейса — навигации, логотипа, акцентов.
+
+## Стек
+
+React 19, TypeScript, Vite, React Router, Recharts.
